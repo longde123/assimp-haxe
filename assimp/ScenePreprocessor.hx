@@ -1,11 +1,11 @@
 package assimp;
+import assimp.format.AiMatKeys;
 import assimp.format.Defs.AiVector3D;
 import assimp.format.Anim.AiVectorKey;
 import assimp.format.Anim.AiQuatKey;
 import assimp.format.Defs;
 import assimp.format.Scene.AiNode;
 import assimp.format.Defs.AiQuaternion;
-import assimp.format.Defs.AiVector3D;
 import assimp.format.Anim.AiAnimation;
 import glm.Vec3;
 import Lambda;
@@ -48,7 +48,7 @@ class ScenePreprocessor {
             tmp.color = new Color();
             tmp.color.diffuse = new AiColor3D(0.6);
             // setup the default name to make this material identifiable
-            tmp.name = Material.AI_DEFAULT_MATERIAL_NAME;
+            tmp.name = AiDefines.AI_DEFAULT_MATERIAL_NAME;
             scene.materials.push(tmp);
             trace("ScenePreprocessor: Adding default material '$ Material.AI_DEFAULT_MATERIAL_NAME'");
 

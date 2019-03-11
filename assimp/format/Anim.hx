@@ -8,7 +8,11 @@ package assimp.format;
 /** A time-value pair specifying a certain 3D vector for the given time. */
 import assimp.format.Defs.AiQuaternion;
 import assimp.format.Defs.AiVector3D;
-class AiVectorKey {
+interface AiKey {
+    var time:Float ;
+}
+
+class AiVectorKey implements AiKey {
 /** The time of this key */
     public var time:Float ;
 
@@ -26,7 +30,7 @@ class AiVectorKey {
 // ---------------------------------------------------------------------------
 /** A time-value pair specifying a rotation for the given time.
  *  Rotations are expressed with quaternions. */
-class AiQuatKey {
+class AiQuatKey implements AiKey {
 /** The time of this key */
     public var time:Float ;
 
@@ -43,21 +47,21 @@ class AiQuatKey {
 
 // ---------------------------------------------------------------------------
 /** Binds a anim mesh to a specific point in time. */
-class AiMeshKey {
+class AiMeshKey implements AiKey {
     /** The time of this key */
-    public var mTime:Float;
+    public var time:Float;
 
     /** Index into the aiMesh::mAnimMeshes array of the mesh corresponding to the #aiMeshAnim hosting this key frame. The referenced anim mesh is evaluated
          *  according to the rules defined in the docs for #aiAnimMesh.*/
-    public var mValue:Int ;
+    public var value:Int ;
 
     public function new() {
-        this.mTime = 0;
-        this.mValue = 0;
+        this.time = 0;
+        this.value = 0;
     }
 }
 /** Binds a morph anim mesh to a specific point in time. */
-class AiMeshMorphKey {
+class AiMeshMorphKey implements AiKey {
 /** The time of this key */
     public var time:Float;
     /** The values and weights at the time of this key */

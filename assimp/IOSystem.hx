@@ -4,7 +4,16 @@ import assimp.IOSystem.IOStream;
 import assimp.format.Defs.AiVector3D;
 import haxe.io.BytesInput;
 import haxe.io.Bytes;
+class MemoryIOSystem extends IOSystem {
+    public var filename:String;
+    public var bytes:Bytes;
 
+    public function new(filename:String, bytes:Bytes) {
+        super();
+        this.filename = filename;
+        this.bytes = bytes;
+    }
+}
 class MemoryIOStream extends IOStream {
     public function new(b:Bytes, ?pos:Int, ?len:Int) {
         super(b, pos, len);

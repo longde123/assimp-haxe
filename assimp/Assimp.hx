@@ -8,6 +8,9 @@ class Assimp {
     static public var BLENDER_NO_STATS = false;
     static public var NO = new No();
     static public var PROCESS = new Process();
+    static public var AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE = "PP_GSN_MAX_SMOOTHING_ANGLE";
+    static public var AI_CONFIG_PP_RVC_FLAGS = "PP_RVC_FLAGS";
+    static public var AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS = "IMPORT_FBX_PRESERVE_PIVOTS";
 
     public function new() {
     }

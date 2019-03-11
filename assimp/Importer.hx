@@ -1,4 +1,6 @@
 package assimp;
+import assimp.IOSystem.MemoryIOSystem;
+import haxe.io.Bytes;
 import Lambda;
 import Lambda;
 import assimp.AiPostProcessStep;
@@ -11,6 +13,10 @@ class Importer {
     static var impl = new ImporterPimpl(); // allocate the pimpl first
 
     public function new() {
+    }
+
+    public function getErrorString():String {
+        return "";
     }
     /** Registers a new loader.
      *
@@ -97,7 +103,16 @@ class Importer {
     private function writeLogOpening(file:String) {
     }
 
-    var ioHandler(get, set):IOSystem;
+    public var progressHandler(get, set):ProgressHandler;
+
+    function get_progressHandler() return impl.progressHandler;
+
+    function set_progressHandler(value) {
+        impl.progressHandler = value;
+        return value;
+    }
+
+    public var ioHandler(get, set):IOSystem;
 
     function get_ioHandler() return impl.ioSystem;
 
@@ -205,6 +220,25 @@ class Importer {
         return impl.scene;
     }
 
+    public function readFileFromMemory(buffer:Bytes, flags:Int, hint:String = ""):AiScene {
+        var MaxLenHint = 200;
+        if (buffer.length == 0 || hint.length > MaxLenHint) {
+            impl.errorString = "Invalid parameters passed to ReadFileFromMemory()";
+            return null;
+        }
+
+        // prevent deletion of previous IOSystem
+        var io = impl.ioSystem;
+
+        var fileName = "$AI_MEMORYIO_MAGIC_FILENAME.$hint";
+
+        ioHandler = new MemoryIOSystem(fileName, buffer);
+        readFile(fileName, ioHandler, flags);
+
+        impl.ioSystem = io;
+
+        return impl.scene;
+    }
     /** Apply post-processing to an already-imported scene.
      *
      *  This is strictly equivalent to calling readFile() with the same flags. However, you can use this separate

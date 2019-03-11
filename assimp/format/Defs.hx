@@ -18,7 +18,105 @@ typedef AiVector2D = Vec2;
 typedef AiQuaternion = Quat;
 typedef AiMatrix4x4 = Mat4;
 typedef AiMatrix3x3 = Mat3;
+/*
+*
 
+			_r0c0:Float = 0, _r0c1:Float = 0, _r0c2:Float = 0,
+            _r1c0:Float = 0, _r1c1:Float = 0, _r1c2:Float = 0,
+            _r2c0:Float = 0, _r2c1:Float = 0, _r2c2:Float = 0
+
+            bone.offsetMatrix.a0,bone.offsetMatrix.b0,bone.offsetMatrix.c0,bone.offsetMatrix.d0,
+            bone.offsetMatrix.a1,bone.offsetMatrix.b1,bone.offsetMatrix.c1,bone.offsetMatrix.d1,
+            bone.offsetMatrix.a2,bone.offsetMatrix.b2,bone.offsetMatrix.c2,bone.offsetMatrix.d2,
+            bone.offsetMatrix.a3,bone.offsetMatrix.b3,bone.offsetMatrix.c3,bone.offsetMatrix.d3
+            */
+class AiDefines {
+
+/// <summary>
+/// Default value for <see cref="AiConfigs.AI_CONFIG_PP_SLM_TRIANGLE_LIMIT"/>.
+/// </summary>
+    public static var AI_SLM_DEFAULT_MAX_TRIANGLES = 1000000;
+
+    /// <summary>
+    /// Default value for <see cref="AiConfigs.AI_CONFIG_PP_SLM_VERTEX_LIMIT"/>.
+    /// </summary>
+    public static var AI_SLM_DEFAULT_MAX_VERTICES = 1000000;
+
+    /// <summary>
+    /// Default value for <see cref="AiConfigs.AI_CONFIG_PP_LBW_MAX_WEIGHTS"/>.
+    /// </summary>
+    public static var AI_LBW_MAX_WEIGHTS = 0x4;
+
+    /// <summary>
+    /// Default value for <see cref="AiConfigs.AI_CONFIG_PP_ICL_PTCACHE_SIZE"/>.
+    /// </summary>
+    public static var PP_ICL_PTCACHE_SIZE = 12;
+
+    /// <summary>
+    /// Default value for <see cref="AiConfigs.AI_CONFIG_PP_TUV_EVALUATE"/>
+    /// </summary>
+//todo
+// public const int AI_UVTRAFO_ALL = (int) (UVTransformFlags.Rotation | UVTransformFlags.Scaling | UVTransformFlags.Translation);
+
+
+    /// <summary>
+    /// Defines the maximum number of indices per face (polygon).
+    /// </summary>
+    public static var AI_MAX_FACE_INDICES = 0x7fff;
+
+    /// <summary>
+    /// Defines the maximum number of bone weights.
+    /// </summary>
+    public static var AI_MAX_BONE_WEIGHTS = 0x7fffffff;
+
+    /// <summary>
+    /// Defines the maximum number of vertices per mesh.
+    /// </summary>
+    public static var AI_MAX_VERTICES = 0x7fffffff;
+
+    /// <summary>
+    /// Defines the maximum number of faces per mesh.
+    /// </summary>
+    public static var AI_MAX_FACES = 0x7fffffff;
+
+    /// <summary>
+    /// Defines the maximum number of vertex color sets per mesh.
+    /// </summary>
+    public static var AI_MAX_NUMBER_OF_COLOR_SETS = 0x8;
+
+    /// <summary>
+    /// Defines the maximum number of texture coordinate sets (UV(W) channels) per mesh.
+    /// </summary>
+    public static var AI_MAX_NUMBER_OF_TEXTURECOORDS = 0x8;
+
+    /// <summary>
+    /// Defines the default bone count limit.
+    /// </summary>
+    public static var AI_SBBC_DEFAULT_MAX_BONES = 60;
+
+    /// <summary>
+    /// Defines the deboning threshold.
+    /// </summary>
+    public static var AI_DEBONE_THRESHOLD = 1.0;
+
+
+    /// <summary>
+    /// Defines the maximum length of a string used in AiString.
+    /// </summary>
+    public static var MAX_LENGTH = 1024;
+
+
+    /// <summary>
+    /// Defines the default color material.
+    /// </summary>
+    public static var AI_DEFAULT_MATERIAL_NAME = "DefaultMaterial";
+
+    /// <summary>
+    /// Defines the default textured material (if the meshes have UV coords).
+    /// </summary>
+    public static var AI_DEFAULT_TEXTURED_MATERIAL_NAME = "TexturedDefaultMaterial";
+
+}
 class Defs {
 
 
@@ -53,109 +151,81 @@ class Defs {
     public static var AI_MATH_TWO_PIf = Math.PI * 2;
     public static var AI_MATH_HALF_PI = Math.PI;
 
-    static function squareLength2(this1:AiVector3D) {
-        return this1.x * this1.x + this1.y * this1.y + this1.z * this1.z;
-    }
 
-
-    public static function rotationX(a:Float):AiMatrix4x4 {
-        var tmp:Mat4 = Mat4.identity(new AiMatrix4x4());
-
-        /*
-         |  1  0       0       0 |
-     M = |  0  cos(A)  sin(A)  0 |
-         |  0 -sin(A)  cos(A)  0 |
-         |  0  0       0       1 |        */
-        tmp.r1c1 = Math.cos(a);
-        tmp.r2c2 = Math.cos(a);
-        tmp.r1c2 = Math.sin(a);
-        tmp.r2c1 = -Math.sin(a);
-        return tmp;
-    }
-
-    public static function rotationY(a:Float) {
-        var tmp:Mat4 = Mat4.identity(new AiMatrix4x4());
-
-        /*
-         |  cos(A)  0  -sin(A)  0 |
-     M = |  0       1   0       0 |
-         | sin(A)   0   cos(A)  0 |
-         |  0       0   0       1 |        */
-        tmp.r0c0 = Math.cos(a);
-        tmp.r2c2 = Math.cos(a);
-        tmp.r2c0 = Math.sin(a);
-        tmp.r0c2 = -Math.sin(a);
-        return tmp;
-    }
-
-    public static function rotationZ(a:Float) {
-        var tmp:Mat4 = Mat4.identity(new AiMatrix4x4());
-
-        /*
-         |  cos(A)   sin(A)   0   0 |
-     M = | -sin(A)   cos(A)   0   0 |
-         |  0        0        1   0 |
-         |  0        0        0   1 |       */
-        tmp.r0c0 = Math.cos(a);
-        tmp.r1c1 = Math.cos(a);
-        tmp.r0c1 = Math.sin(a);
-        tmp.r1c0 = -Math.sin(a);
-        return tmp;
-    }
-
-    public static function translation(v:Vec3) {
-        var tmp:Mat4 = Mat4.identity(new AiMatrix4x4());
-        tmp.r0c3 = v.x;
-        tmp.r1c3 = v.y;
-        tmp.r2c3 = v.z;
-        return tmp;
-    }
-
-    public static function scaling(v:Vec3) {
-        var tmp:Mat4 = Mat4.identity(new AiMatrix4x4());
-        tmp.r0c0 = v.x;
-        tmp.r1c1 = v.y;
-        tmp.r2c2 = v.z;
-        return tmp;
-    }
     /// <summary>
     /// Constructs a new Quaternion from a rotation matrix.
     /// </summary>
     /// <param name="matrix">Rotation matrix to create the Quaternion from.</param>
     public static function toQuaternion(matrix:AiMatrix3x3) {
-        var trace = matrix.r0c0 + matrix.r1c1 + matrix.r2c2;
+        var trace1 = matrix.r0c0 + matrix.r1c1 + matrix.r2c2;
         var X = 0.0;
         var Y = 0.0;
         var Z = 0.0;
         var W = 0.0;
+//        float trace = matrix.A1 + matrix.B2 + matrix.C3;
+//
 
-        if (trace > 0) {
-            var s = Math.sqrt(trace + 1.0) * 2.0;
+
+        //        if(trace > 0)
+//        {
+//            float s = (float) Math.Sqrt(trace + 1.0f) * 2.0f;
+//            W = .25f * s;
+//            X = (matrix.C2 - matrix.B3) / s;
+//            Y = (matrix.A3 - matrix.C1) / s;
+//            Z = (matrix.B1 - matrix.A2) / s;
+//        }
+        if (trace1 > 0) {
+            var s = Math.sqrt(trace1 + 1.0) * 2.0;
             W = .25 * s;
-
-            X = (matrix.r2c1 - matrix.r1c2) / s;
-            Y = (matrix.r0c2 - matrix.r2c0) / s;
-            Z = (matrix.r1c0 - matrix.r0c1) / s;
+            X = (matrix.r1c2 - matrix.r2c1) / s;
+            Y = (matrix.r2c0 - matrix.r0c2) / s;
+            Z = (matrix.r0c1 - matrix.r1c0) / s;
         }
+
+//        else if((matrix.A1 > matrix.B2) && (matrix.A1 > matrix.C3))
+//        {
+//            float s = (float) Math.Sqrt(((1.0 + matrix.A1) - matrix.B2) - matrix.C3) * 2.0f;
+//            W = (matrix.C2 - matrix.B3) / s;
+//            X = .25f * s;
+//            Y = (matrix.A2 + matrix.B1) / s;
+//            Z = (matrix.A3 + matrix.C1) / s;
+//        }
         else if ((matrix.r0c0 > matrix.r1c1) && (matrix.r0c0 > matrix.r2c2)) {
             var s = Math.sqrt(((1.0 + matrix.r0c0) - matrix.r1c1) - matrix.r2c2) * 2.0 ;
-            W = (matrix.r1c1 - matrix.r2c2) / s;
+            W = (matrix.r1c2 - matrix.r2c1) / s;
             X = .25 * s;
-            Y = (matrix.r0c1 + matrix.r1c0) / s;
-            Z = (matrix.r0c2 + matrix.r2c0) / s;
+            Y = (matrix.r1c0 + matrix.r0c1) / s;
+            Z = (matrix.r2c0 + matrix.r0c2) / s;
         }
+            //        else if(matrix.B2 > matrix.C3)
+//        {
+//            float s = (float) Math.Sqrt(((1.0f + matrix.B2) - matrix.A1) - matrix.C3) * 2.0f;
+//        W = (matrix.A3 - matrix.C1) / s;
+//        X = (matrix.A2 + matrix.B1) / s;
+//        Y = .25f * s;
+//        Z = (matrix.B3 + matrix.C2) / s;
+//        }
         else if (matrix.r1c1 > matrix.r2c2) {
             var s = Math.sqrt(((1.0 + matrix.r1c1) - matrix.r0c0) - matrix.r2c2) * 2.0;
-            W = (matrix.r0c2 - matrix.r2c0) / s;
-            X = (matrix.r0c1 + matrix.r1c0) / s;
+            W = (matrix.r2c0 - matrix.r0c2) / s;
+            X = (matrix.r1c0 + matrix.r0c1) / s;
             Y = .25 * s;
-            Z = (matrix.r1c2 + matrix.r2c1) / s;
+            Z = (matrix.r2c1 + matrix.r1c2) / s;
         }
+
+//        else
+//        {
+//            float s = (float) Math.Sqrt(((1.0f + matrix.C3) - matrix.A1) - matrix.B2) * 2.0f;
+//        W = (matrix.B1 - matrix.A2) / s;
+//        X = (matrix.A3 + matrix.C1) / s;
+//        Y = (matrix.B3 + matrix.C2) / s;
+//            Z = .25f * s;
+//        }
         else {
             var s = Math.sqrt(((1.0 + matrix.r2c2) - matrix.r0c0) - matrix.r1c1) * 2.0 ;
-            W = (matrix.r1c0 - matrix.r0c1) / s;
-            X = (matrix.r0c2 + matrix.r2c0) / s;
-            Y = (matrix.r1c2 + matrix.r2c1) / s;
+            W = (matrix.r0c1 - matrix.r1c0) / s;
+            X = (matrix.r2c0 + matrix.r0c2) / s;
+            Y = (matrix.r2c1 + matrix.r1c2) / s;
             Z = .25 * s;
         }
         var tmp = new AiQuaternion();
@@ -166,9 +236,9 @@ class Defs {
     public static function decompose(this1:Mat4, pScaling:AiVector3D, pRotation:AiQuaternion, pPosition:AiVector3D) {
 
         /* extract translation */
-        pPosition.x = this1.r1c3;
-        pPosition.y = this1.r1c3;
-        pPosition.z = this1.r2c3;
+        pPosition.x = this1.r3c1;
+        pPosition.y = this1.r3c2;
+        pPosition.z = this1.r3c3;
 
         /* extract the columns of the matrix. */
         var vCols = [
@@ -203,13 +273,78 @@ class Defs {
         pRotation.w = q.w;
     }
 
-/** Transformation of a vector by a 4x4 matrix */
-    public static function times(this1:AiMatrix4x4, vector:AiVector3D) {
-        return new AiVector3D(
-        this1.r0c0 * vector.x + this1.r1c0 * vector.y + this1.r2c0 * vector.z + this1.r3c0,
-        this1.r0c1 * vector.x + this1.r1c1 * vector.y + this1.r2c1 * vector.z + this1.r3c1,
-        this1.r0c2 * vector.x + this1.r1c2 * vector.y + this1.r2c2 * vector.z + this1.r3c2);
+    static public function getMatrix(q:AiQuaternion):AiMatrix3x3 {
+        var X = q.x;
+        var Y = q.y;
+        var Z = q.z;
+        var W = q.z;
+        var xx = X * X;
+        var yy = Y * Y;
+        var zz = Z * Z;
+
+        var xy = X * Y;
+        var zw = Z * W;
+        var zx = Z * X;
+        var yw = Y * W;
+        var yz = Y * Z;
+        var xw = X * W;
+
+        var mat = new AiMatrix3x3();
+        mat.r0c0 = 1.0 - (2.0 * (yy + zz));
+        mat.r0c1 = 2.0 * (xy + zw);
+        mat.r0c2 = 2.0 * (zx - yw);
+
+        mat.r1c0 = 2.0 * (xy - zw);
+        mat.r1c1 = 1.0 - (2.0 * (zz + xx));
+        mat.r1c2 = 2.0 * (yz + xw);
+
+        mat.r2c0 = 2.0 * (zx + yw);
+        mat.r2c1 = 2.0 * (yz - xw);
+        mat.r2c2 = 1.0 - (2.0 * (yy + xx));
+
+        return mat;
     }
+
+    static public function slerp(start:AiQuaternion, end:AiQuaternion, factor:Float):AiQuaternion {
+        //Calc cosine theta
+        var cosom = (start.x * end.x) + (start.y * end.y) + (start.z * end.z) + (start.w * end.w);
+
+        //Reverse signs if needed
+        if (cosom < 0.0) {
+            cosom = -cosom;
+            end.x = -end.x;
+            end.y = -end.y;
+            end.z = -end.z;
+            end.w = -end.w;
+        }
+
+        //calculate coefficients
+        var sclp:Float = 0;
+        var sclq:Float = 0;
+        //0.0001 -> some episilon
+        if ((1.0 - cosom) > 0.0001) {
+            //Do a slerp
+            var omega:Float = 0;
+            var sinom:Float = 0;
+            omega = Math.acos(cosom); //extract theta from the product's cos theta
+            sinom = Math.sin(omega);
+            sclp = Math.sin((1.0 - factor) * omega) / sinom;
+            sclq = Math.sin(factor * omega) / sinom;
+        }
+        else {
+            //Very close, do a lerp instead since its faster
+            sclp = 1.0 - factor;
+            sclq = factor;
+        }
+
+        var q:AiQuaternion = new AiQuaternion();
+        q.x = (sclp * start.x) + (sclq * end.x);
+        q.y = (sclp * start.y) + (sclq * end.y);
+        q.z = (sclp * start.z) + (sclq * end.z);
+        q.w = (sclp * start.w) + (sclq * end.w);
+        return q;
+    }
+
 
     public static var epsilon = 10e-3;
 

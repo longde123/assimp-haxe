@@ -51,6 +51,10 @@ class AiMetadata {
         return Lambda.count(map);
     }
 
+    public function keys() {
+        return map.keys();
+    }
+
     public function set(key:String, value:AiMetadataEntry<Any>) {
         // Ensure that we have a valid key.
         return if (key == null) {
@@ -75,7 +79,7 @@ class AiMetadata {
         return !Lambda.empty(map);
     }
 
-    public function get(key:String) {
+    public function get(key:String):AiMetadataEntry< Any> {
         return map.exists(key) ? map.get(key) : null;
     }
 }

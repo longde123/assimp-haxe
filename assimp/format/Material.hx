@@ -1,4 +1,13 @@
 package assimp.format;
+import assimp.IOSystem.MemoryIOStream;
+import assimp.format.Defs.AiColor4D;
+import haxe.io.BytesInput;
+import assimp.IOStreamUtil;
+import minko.render.WrapMode;
+import Lambda;
+import Lambda;
+import assimp.Types.AiReturn;
+import Lambda;
 import assimp.format.Defs.AiVector2D;
 import assimp.format.Defs.AiVector3D;
 import assimp.format.Defs.AiColor3D;
@@ -6,6 +15,29 @@ import assimp.format.Defs.AiVector3D;
 import assimp.format.Defs.AiColor3D;
 import assimp.format.Defs.AiVector2D;
 import haxe.io.Bytes;
+
+@:enum abstract PropertyType(Int) from Int to Int
+{
+    /// <summary>
+    /// Array of single-precision (32 bit) floats.
+    /// </summary>
+    var AiFloat = 0x1;
+
+/// <summary>
+/// Property is a string.
+/// </summary>
+    var AiString = 0x3;
+
+    /// <summary>
+    /// Array of 32 bit integers.
+    /// </summary>
+    var AiInteger = 0x4;
+
+    /// <summary>
+    /// Byte buffer where the content is undefined.
+    /// </summary>
+    var AiBuffer = 0x5;
+}
 class AiMaterialProperty {
     public var mKey:String;
     public var mSemantic:Int;
@@ -14,21 +46,55 @@ class AiMaterialProperty {
     public var mDataLength:Int;
     public var mType:Int;
     public var mData:Bytes;
+    public var fullyQualifiedName(get, null):String;
 
-    public function new() {
-
+    function get_fullyQualifiedName() {
+        return AiMaterial.createFullyQualifiedName(mKey, mType, mIndex);
     }
-}
-class Material {
+    /// <returns>Float</returns>
+    public function getFloatValue() {
+        if (mType == PropertyType.AiFloat || mType == PropertyType.AiInteger)
+            return new BytesInput(mData).readFloat();
 
-/**
- * Created by elect on 17/11/2016.
- */
+        return 0;
+    }
 
-// Name for default materials (2nd is used if meshes have UV coords)
-    public static var AI_DEFAULT_MATERIAL_NAME = "DefaultMaterial";
+    public function getStringValue() {
+        if (mType != PropertyType.AiString)
+            return null;
+        var stream = new MemoryIOStream(mData);
+        return IOStreamUtil.readAiString(stream);
+    }
+
+    public function getIntegerValue() {
+        if (mType == PropertyType.AiFloat || mType == PropertyType.AiInteger)
+            return new BytesInput(mData).readInt32();
+
+        return 0;
+    }
+
+    public function getColor4DValue():AiColor4D {
+        if (mType != PropertyType.AiFloat || mData == null)
+            return new AiColor4D();
+
+        //We may have a Color that's RGB, so still read it and set alpha to 1.0
+
+
+        if (mData.length >= 4 * 8) {
+            var stream = new MemoryIOStream(mData);
+            return IOStreamUtil.readAiColor4D(stream);
+        }
+        else if (mData.length >= 3 * 8) {
+            var stream = new MemoryIOStream(mData);
+            var color3D:AiColor3D = IOStreamUtil.readAiColor3D(stream);
+            return new AiColor4D(color3D.r, color3D.g, color3D.b, 1.0);
+        }
+
+        return new AiColor4D();
+    }
 
     public function new() {
+
     }
 }
 
@@ -183,7 +249,7 @@ class AiTexture {
      *
      *  In content pipelines you'll usually define how textures have to be handled, and the artists working on models have
      *  to conform to this specification, regardless which 3D tool they're using. */
-@:enum abstract Type(Int) from Int to Int {
+@:enum abstract AiTextureType(Int) from Int to Int {
 
     /** Dummy value.
          *
@@ -351,7 +417,7 @@ class AiTexture {
      *  @code
      *  SourceColor*SourceAlpha + DestColor*(1-SourceAlpha)
      *  @endcode     */
-    var blend = 0;
+    var alpha = 0;
 
     /** Additive blending
      *
@@ -396,8 +462,69 @@ class AiUVTransform {
         this.rotation = 0;
     }
 }
+class AiString {
+    public var data:String;
+
+    public function new():Void {
+
+    }
+}
+
+class Color {
+
+    public var diffuse:Null<AiColor3D>;
+
+    public var ambient:Null<AiColor3D>;
+    public var specular:Null<AiColor3D>;
+
+    public var emissive:Null<AiColor3D>;
+
+    public var transparent:Null<AiColor3D>;
+
+    public var reflective:Null<AiColor3D>;
+    // TODO unsure
+    public function new() {
+
+    }
+}
+
+class AiMaterialTexture {
+
+    public var type:Null<AiTextureType>;
+    public var textureIndex:Int;
+    public var file:Null<String>; // HINT this is used as the index to reference textures in AiScene.textures
+
+    public var blend:Null<Float>;
+
+    public var op:Null<Op>;
+
+    public var mapping:Null<Mapping>;
+
+    public var uvwsrc:Null<Int>;
+
+    public var mapModeU:Null<MapMode>;
+
+    public var mapModeV:Null<MapMode>;
+
+    public var mapAxis:Null<AiVector3D>;
+
+    public var flags:Null<Int>;
+
+    public var uvTrafo:Null<AiUVTransform>;
+
+    public function new():Void {
+
+    }
+
+}
+
 
 class AiMaterial {
+
+/**
+ * Created by elect on 17/11/2016.
+ */
+
 
     public var name:Null<String>;
 
@@ -425,7 +552,7 @@ class AiMaterial {
 
     public var displacementScaling:Null<Float>;
 
-    public var textures:Array<Texture>;
+    public var textures:Array< AiMaterialTexture>;
     public var numAllocated:Int;
     public var numProperties:Int;
     public var properties:Array<AiMaterialProperty>;
@@ -434,52 +561,248 @@ class AiMaterial {
 
     }
 
-}
+    /// <summary>
+    /// Helper method to construct a fully qualified name from the input parameters. All the input parameters are combined into the fully qualified name: {baseName},{texType},{texIndex}. E.g.
+    /// "$clr.diffuse,0,0" or "$tex.file,1,0". This is the name that is used as the material dictionary key.
+    /// </summary>
+    /// <param name="baseName">Key basename, this must not be null or empty</param>
+    /// <param name="texType">Texture type; non-texture properties should leave this <see cref="TextureType.None"/></param>
+    /// <param name="texIndex">Texture index; non-texture properties should leave this zero.</param>
+    /// <returns>The fully qualified name</returns>
+    public static function createFullyQualifiedName(baseName, texType, texIndex) {
+        if (null == (baseName))
+            return null;
 
-class Color {
-
-    public var diffuse:Null<AiColor3D>;
-
-    public var ambient:Null<AiColor3D>;
-    public var specular:Null<AiColor3D>;
-
-    public var emissive:Null<AiColor3D>;
-
-    public var transparent:Null<AiColor3D>;
-
-    public var reflective:Null<AiColor3D>;
-    // TODO unsure
-    public function new() {
-
+        return "{$baseName},{$texType},{$texIndex}" ;
     }
-}
 
-class Texture {
+    /// <summary>
+    /// Gets the non-texture properties contained in this Material. The name should be
+    /// the "base name", as in it should not contain texture type/texture index information. E.g. "$clr.diffuse" rather than "$clr.diffuse,0,0". The extra
+    /// data will be filled in automatically.
+    /// </summary>
+    /// <param name="baseName">Key basename</param>
+    /// <returns>The material property, if it exists</returns>
+    public function getNonTextureProperty(baseName) {
+        if (null == (baseName)) {
+            return null;
+        }
+        var fullyQualifiedName = createFullyQualifiedName(baseName, AiTextureType.none, 0);
+        return getProperty(fullyQualifiedName);
+    }
 
-    public var type:Null<Type>;
+    /// <summary>
+    /// Gets the material property. All the input parameters are combined into the fully qualified name: {baseName},{texType},{texIndex}. E.g.
+    /// "$clr.diffuse,0,0" or "$tex.file,1,0".
+    /// </summary>
+    /// <param name="baseName">Key basename</param>
+    /// <param name="texType">Texture type; non-texture properties should leave this <see cref="TextureType.None"/></param>
+    /// <param name="texIndex">Texture index; non-texture properties should leave this zero.</param>
+    /// <returns>The material property, if it exists</returns>
+    public function getMaterialProperty(baseName, texType, texIndex) {
+        if (null == (baseName)) {
+            return null;
+        }
+        var fullyQualifiedName = createFullyQualifiedName(baseName, texType, texIndex);
+        return getProperty(fullyQualifiedName);
+    }
 
-    public var file:Null<String>; // HINT this is used as the index to reference textures in AiScene.textures
+    /// <summary>
+    /// Gets the material property by its fully qualified name. The format is: {baseName},{texType},{texIndex}. E.g.
+    /// "$clr.diffuse,0,0" or "$tex.file,1,0".
+    /// </summary>
+    /// <param name="fullyQualifiedName">Fully qualified name of the property</param>
+    /// <returns>The material property, if it exists</returns>
+    public function getProperty(fullyQualifiedName):AiMaterialProperty {
+        if (null == (fullyQualifiedName)) {
+            return null;
+        }
+        return Lambda.find(properties, function(p:AiMaterialProperty)return p.mKey == fullyQualifiedName);
+    }
 
-    public var blend:Null<Float>;
+    /// <summary>
+    /// Checks if the material has the specified non-texture property. The name should be
+    /// the "base name", as in it should not contain texture type/texture index information. E.g. "$clr.diffuse" rather than "$clr.diffuse,0,0". The extra
+    /// data will be filled in automatically.
+    /// </summary>
+    /// <param name="baseName">Key basename</param>
+    /// <returns>True if the property exists, false otherwise.</returns>
+    public function hasNonTextureProperty(baseName) {
+        if (null == (baseName)) {
+            return false;
+        }
+        var fullyQualifiedName = createFullyQualifiedName(baseName, AiTextureType.none, 0);
+        return hasProperty(fullyQualifiedName);
+    }
 
-    public var op:Null<Op>;
+    /// <summary>
+    /// Checks if the material has the specified property. All the input parameters are combined into the fully qualified name: {baseName},{texType},{texIndex}. E.g.
+    /// "$clr.diffuse,0,0" or "$tex.file,1,0".
+    /// </summary>
+    /// <param name="baseName">Key basename</param>
+    /// <param name="texType">Texture type; non-texture properties should leave this <see cref="TextureType.None"/></param>
+    /// <param name="texIndex">Texture index; non-texture properties should leave this zero.</param>
+    /// <returns>True if the property exists, false otherwise.</returns>
+    public function hasMaterialProperty(baseName, texType, texIndex) {
+        if (null == (baseName)) {
+            return false;
+        }
 
-    public var mapping:Null<Mapping>;
+        var fullyQualifiedName = createFullyQualifiedName(baseName, texType, texIndex);
+        return hasProperty(fullyQualifiedName);
+    }
 
-    public var uvwsrc:Null<Int>;
+    /// <summary>
+    /// Checks if the material has the specified property by looking up its fully qualified name. The format is: {baseName},{texType},{texIndex}. E.g.
+    /// "$clr.diffuse,0,0" or "$tex.file,1,0".
+    /// </summary>
+    /// <param name="fullyQualifiedName">Fully qualified name of the property</param>
+    /// <returns>True if the property exists, false otherwise.</returns>
+    public function hasProperty(fullyQualifiedName):Bool {
+        if (null == (fullyQualifiedName)) {
+            return false;
+        }
+        return Lambda.exists(properties, function(p:AiMaterialProperty) {
+            return p.mKey == fullyQualifiedName;
+        });
+    }
 
-    public var mapModeU:Null<MapMode>;
+    /// <summary>
+    /// Adds a property to this material.
+    /// </summary>
+    /// <param name="matProp">Material property</param>
+    /// <returns>True if the property was successfully added, false otherwise (e.g. null or key already present).</returns>
+    public function addProperty(matProp:AiMaterialProperty) {
+        if (matProp == null)
+            return false;
 
-    public var mapModeV:Null<MapMode>;
+        if (hasProperty(matProp.fullyQualifiedName))
+            return false;
 
-    public var mapAxis:Null<AiVector3D>;
+        properties.push(matProp);
 
-    public var flags:Null<Int>;
+        return true;
+    }
 
-    public var uvTrafo:Null<AiUVTransform>;
+    /// <summary>
+    /// Removes a non-texture property from the material.
+    /// </summary>
+    /// <param name="baseName">Property name</param>
+    /// <returns>True if the property was removed, false otherwise</returns>
+    public function removeNonTextureProperty(baseName) {
+        if (null == (baseName))
+            return false;
 
-    public function new():Void {
+        return removeProperty(createFullyQualifiedName(baseName, AiTextureType.none, 0));
+    }
 
+    /// <summary>
+    /// Removes a property from the material.
+    /// </summary>
+    /// <param name="baseName">Name of the property</param>
+    /// <param name="texType">Property texture type</param>
+    /// <param name="texIndex">Property texture index</param>
+    /// <returns>True if the property was removed, false otherwise</returns>
+    public function removeMaterialProperty(baseName, texType, texIndex) {
+        if (null == (baseName))
+            return false;
+
+        return removeProperty(createFullyQualifiedName(baseName, texType, texIndex));
+    }
+
+    /// <summary>
+    /// Removes a property from the material.
+    /// </summary>
+    /// <param name="fullyQualifiedName">Fully qualified name of the property ({basename},{texType},{texIndex})</param>
+    /// <returns>True if the property was removed, false otherwise</returns>
+    public function removeProperty(fullyQualifiedName) {
+        if (null == (fullyQualifiedName))
+            return false;
+
+        properties = properties.filter(function(p:AiMaterialProperty) return p.fullyQualifiedName != fullyQualifiedName);
+        return true;
+    }
+
+    /// <summary>
+    /// Removes all properties from the material;
+    /// </summary>
+    public function clear() {
+        properties = [];
+    }
+
+    /// <summary>
+    /// Gets -all- properties contained in the Material.
+    /// </summary>
+    /// <returns>All properties in the material property map.</returns>
+    public function getAllProperties() {
+
+
+        return properties.copy();
+    }
+
+    /// <summary>
+    /// Gets all the number of textures that are of the specified texture type.
+    /// </summary>
+    /// <param name="texType">Texture type</param>
+    /// <returns>Texture count</returns>
+    public function getMaterialTextureCount(texType) {
+        var count = 0;
+        for (matProp in properties) {
+
+
+            if (StringTools.startsWith(matProp.mKey, AiMatKeys.TEXTURE_BASE) && matProp.mType == texType) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Gets a texture that corresponds to the type/index.
+    /// </summary>
+    /// <param name="texType">Texture type</param>
+    /// <param name="texIndex">Texture index</param>
+    /// <param name="texture">Texture description</param>
+    /// <returns>True if the texture was found in the material</returns>
+    public function getMaterialTexture(texType, texIndex, texture:AiMaterialTexture) {
+
+        var texName = createFullyQualifiedName(AiMatKeys.TEXTURE_BASE, texType, texIndex);
+
+        var texNameProp = getProperty(texName);
+
+        //This one is necessary, the rest are optional
+        if (texNameProp == null)
+            return false;
+
+        var mappingName = createFullyQualifiedName(AiMatKeys.MAPPING_BASE, texType, texIndex);
+        var uvIndexName = createFullyQualifiedName(AiMatKeys.UVWSRC_BASE, texType, texIndex);
+        var blendFactorName = createFullyQualifiedName(AiMatKeys.TEXBLEND_BASE, texType, texIndex);
+        var texOpName = createFullyQualifiedName(AiMatKeys.TEXOP_BASE, texType, texIndex);
+        var uMapModeName = createFullyQualifiedName(AiMatKeys.MAPPINGMODE_U_BASE, texType, texIndex);
+        var vMapModeName = createFullyQualifiedName(AiMatKeys.MAPPINGMODE_V_BASE, texType, texIndex);
+        var texFlagsName = createFullyQualifiedName(AiMatKeys.TEXFLAGS_BASE, texType, texIndex);
+
+        var mappingNameProp = getProperty(mappingName);
+        var uvIndexNameProp = getProperty(uvIndexName);
+        var blendFactorNameProp = getProperty(blendFactorName);
+        var texOpNameProp = getProperty(texOpName);
+        var uMapModeNameProp = getProperty(uMapModeName);
+        var vMapModeNameProp = getProperty(vMapModeName);
+        var texFlagsNameProp = getProperty(texFlagsName);
+
+        texture.file = texNameProp.getStringValue();
+        texture.type = texType;
+        texture.textureIndex = texIndex;
+        texture.mapping = (mappingNameProp != null) ? mappingNameProp.getIntegerValue() : Mapping.uv;
+        texture.uvwsrc = (uvIndexNameProp != null) ? uvIndexNameProp.getIntegerValue() : 0;
+        texture.blend = (blendFactorNameProp != null) ? blendFactorNameProp.getFloatValue() : 0.0 ;
+        texture.op = (texOpNameProp != null) ? texOpNameProp.getIntegerValue() : 0;
+        texture.mapModeU = (uMapModeNameProp != null) ? uMapModeNameProp.getIntegerValue() : MapMode.wrap;
+        texture.mapModeV = (vMapModeNameProp != null) ? vMapModeNameProp.getIntegerValue() : MapMode.wrap;
+        texture.flags = (texFlagsNameProp != null) ? texFlagsNameProp.getIntegerValue() : 0;
+
+        return true;
     }
 
 }

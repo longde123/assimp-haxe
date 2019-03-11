@@ -7,9 +7,17 @@ package assimp;
  *  Each Importer instance maintains its own ProgressHandler. The default implementation provided by Assimp
  *  doesn't do anything at all. */
 class ProgressHandler {
+    public var _progressFunction:Float -> Void;
+
     public function new() {
+        _progressFunction = function(v) {
+
+        }
     }
 
+    public function progressFunction(f:Float -> Void) {
+        _progressFunction = f;
+    }
     // -------------------------------------------------------------------
     /** @brief Progress callback.
      *  @param percentage An estimate of the current loading progress, in percent. Or -1f if such an estimate is not
@@ -23,6 +31,7 @@ class ProgressHandler {
      *  perform all needed cleanup tasks prior to returning control to the caller). If the loading is aborted,
      *  Importer.readFile() returns always null.    */
     public function update(percentage:Float = -1):Bool {
+        this._progressFunction(percentage);
         return false;
     }
 
