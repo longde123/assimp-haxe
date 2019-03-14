@@ -1,4 +1,5 @@
 package assimp.format.assbin;
+import haxe.io.Bytes;
 import assimp.format.Camera.AiCamera;
 import assimp.format.Light.AiLightSourceType;
 import assimp.format.Light.AiLight;
@@ -101,7 +102,8 @@ class AssbinLoader extends BaseImporter {
         if (compressed) {
             var uncompressedSize = stream.readInt32();
             var compressedSize = stream.length;
-            var compressedData = stream.read(compressedSize);
+            var compressedData = Bytes.alloc(compressedSize);
+            stream.readBytes(compressedData,stream.length,compressedSize);
             var io:MemoryIOStream = new MemoryIOStream(haxe.zip.Uncompress.run(compressedData));
             readBinaryScene(io, pScene);
         } else {
