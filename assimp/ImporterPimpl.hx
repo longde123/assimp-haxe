@@ -1,4 +1,5 @@
 package assimp;
+import assimp.format.assbin.AssbinLoader;
 import haxe.ds.IntMap;
 import assimp.format.Scene.AiScene;
 class ImporterPimpl {
@@ -33,6 +34,8 @@ class ImporterPimpl {
      *  Allocate a SharedPostProcessInfo object and store pointers to it in all post-process steps in the list. */
     public var ppShared:Array<Any>;// = SharedPostProcessInfo().also { info -> postProcessingSteps.forEach { it.shared = info } }
     public function new() {
+        properties=new IntMap<Any>();
+        ppShared=[];
         importer = importerInstanceList();
 
         postProcessingSteps = postProcessingStepInstanceList();
@@ -40,8 +43,8 @@ class ImporterPimpl {
 
     public function isDefaultHandler() return Std.is(ioSystem, DefaultIOSystem);
 
-    public function importerInstanceList() {
-        return [];
+    public function importerInstanceList():Array<BaseImporter> {
+        return [new AssbinLoader()];
     }
 
     public function postProcessingStepInstanceList() {

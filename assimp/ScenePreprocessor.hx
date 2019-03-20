@@ -40,7 +40,9 @@ class ScenePreprocessor {
         // - nothing to do for cameras for the moment
 
         // Process all animations
-        for (it in scene.animations) { AiAnimation_process(it); }
+        for (it in scene.animations) {
+            AiAnimation_process(it);
+        }
 
         // Generate a default material if none was specified
         if (scene.numMaterials == 0 && scene.numMeshes > 0) {
@@ -52,7 +54,9 @@ class ScenePreprocessor {
             scene.materials.push(tmp);
             trace("ScenePreprocessor: Adding default material '$ Material.AI_DEFAULT_MATERIAL_NAME'");
 
-            for (it in scene.meshes) { it.materialIndex = scene.numMaterials; }
+            for (it in scene.meshes) {
+                it.materialIndex = scene.numMaterials;
+            }
 
             scene.numMaterials++;
         }

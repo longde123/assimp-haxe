@@ -30,7 +30,7 @@ import assimp.ImporterDesc.AiImporterDesc;
 using assimp.IOStreamUtil;
 class AssbinLoader extends BaseImporter {
     private static var ASSBIN_VERSION_MINOR = 0;
-    private static var ASSBIN_VERSION_MAJOR = 0;
+    private static var ASSBIN_VERSION_MAJOR = 1;
     private static var ASSBIN_HEADER_LENGTH = 512;
 
 // these are the magic chunk identifiers for the binary ASS file format
@@ -71,15 +71,15 @@ class AssbinLoader extends BaseImporter {
     }
 
 
-    override public function canRead(file:String, ioSystem:IOSystem, checkSig:Bool):Bool {
-        var ioStream:IOStream = ioSystem.open(file);
-        var s = ioStream.readString(32) ;
-        ioSystem.close(ioStream);
-        return s == "ASSIMP.binary-dump." ;
+    override public function canRead(file:String, ioStream:IOStream, checkSig:Bool):Bool {
+        var s:String = ioStream.readString(32) ;
+        s=s.substr(0,19);
+        return s== "ASSIMP.binary-dump." ;
     }
 
-    override public function internReadFile(pFile:String, pIOHandler:IOSystem, pScene:AiScene) {
-        var stream:IOStream = pIOHandler.open(pFile);
+    override public function internReadFile(pFile:String, ioStream:IOStream, pScene:AiScene) {
+        ioStream.position=0;
+        var stream:IOStream = ioStream;
         if (null == stream) {
             return;
         }
@@ -109,7 +109,7 @@ class AssbinLoader extends BaseImporter {
         } else {
             readBinaryScene(stream, pScene);
         }
-        pIOHandler.close(stream);
+
     }
 
 // -----------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ class AssbinLoader extends BaseImporter {
         }
 
         if (numChildren > 0) {
-            node.children = [for (i in 0... numMeshes) new AiNode()];// aiNode*[numChildren];
+            node.children = [for (i in 0... numChildren) new AiNode()];// aiNode*[numChildren];
             for (i in 0... numChildren) {
                 readBinaryNode(stream, node.children[i], node);
                 node.numChildren++;
@@ -287,7 +287,7 @@ class AssbinLoader extends BaseImporter {
         } else {
             // else write as usual
             // if there are less than 2^16 vertices, we can simply use 16 bit integers ...
-            mesh.faces = [for (i in 0... mesh.numVertices) new AiFace()];//new aiFace[mesh->mNumFaces];
+            mesh.faces = [for (i in 0... mesh.numFaces) new AiFace()];//new aiFace[mesh->mNumFaces];
             for (i in 0...mesh.numFaces) {
                 var f = mesh.faces[i];
 
@@ -481,7 +481,7 @@ class AssbinLoader extends BaseImporter {
 
 // -----------------------------------------------------------------------------------
     function readBinaryScene(stream:IOStream, scene:AiScene) {
-        if (stream.readInt32() != AssbinLoader.ASSBIN_CHUNK_AISCENE)
+        if (stream.readInt32()!= AssbinLoader.ASSBIN_CHUNK_AISCENE)
             throw ("Magic chunk identifiers are wrong!");
         var size = stream.readInt32();
 

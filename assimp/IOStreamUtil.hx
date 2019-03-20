@@ -74,8 +74,25 @@ class IOStreamUtil {
 
 // -----------------------------------------------------------------------------------
     static public function readAiMatrix4x4(stream:IOStream) {
-        var tmp:Array<Float> = [for (i in 0...16) stream.readFloat()];
-        var m:AiMatrix4x4 = tmp;
+        /* aiMatrix4x4 m;
+    for (unsigned int i = 0; i < 4;++i) {
+        for (unsigned int i2 = 0; i2 < 4;++i2) {
+            m[i][i2] = Read<float>(stream);
+            cloum row
+        }
+    }*/
+
+        // Assimp aiMatrix4x4 are row-major meanwhile
+
+        var arr:Array<Float> = [for (i in 0...16) stream.readFloat()];
+        // glm mat4 are column-major (so are OpenGL matrices)
+//        var m:AiMatrix4x4 = new AiMatrix4x4(
+//            arr[ 0], arr[ 1], arr[ 2], arr[3],
+//            arr[ 4], arr[ 5], arr[ 6], arr[7],
+//            arr[ 8], arr[ 9], arr[10], arr[11],
+//            arr[ 12], arr[ 13], arr[14], arr[15]
+//        );
+        var m:AiMatrix4x4 =arr;
         return m;
     }
 

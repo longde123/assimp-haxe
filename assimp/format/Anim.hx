@@ -257,7 +257,7 @@ class AiAnimation {
         this.mNumMeshChannels = 0;
         this.numMorphMeshChannels = 0;
         this.channels = [];
-        this.mMeshChannels = [[]];
+        this.mMeshChannels = [];
         this.morphMeshChannels = [];
     }
 

@@ -1,5 +1,6 @@
 package assimp;
 
+import assimp.IOSystem.IOStream;
 import assimp.format.Scene.AiScene;
 import assimp.ImporterDesc.AiImporterDesc;
 class BaseImporter {
@@ -32,7 +33,7 @@ class BaseImporter {
      *  time to examine the contents of the file to be loaded for magic bytes, keywords, etc to be able to load files
      *  with unknown/not existent file extensions.
      *  @return true if the class can read this file, false if not. */
-    public function canRead(file:String, ioSystem:IOSystem, checkSig:Bool):Bool {
+    public function canRead(file:String, ioStream:IOStream, checkSig:Bool):Bool {
         return false;
     }
 
@@ -49,7 +50,7 @@ class BaseImporter {
      *  exception is thrown somewhere in internReadFile(), this function will catch it and transform it into a suitable
      *  response to the caller.
      */
-    public function readFile(imp:ImporterPimpl, ioSystem:IOSystem, filePath:String):Null<AiScene> {
+    public function readFile(imp:ImporterPimpl,ioStream:IOStream, filePath:String):Null<AiScene> {
 
         progress = imp.progressHandler;
 ///assert(progress != null)
@@ -62,7 +63,7 @@ class BaseImporter {
 
         // dispatch importing
 
-        internReadFile(filePath, ioSystem, sc);
+        internReadFile(filePath, ioStream, sc);
 
         // return what we gathered from the import.
         return sc;
@@ -117,7 +118,7 @@ class BaseImporter {
      *  @param file Path of the file to be imported.
      *  @param scene The scene object to hold the imported data. Null is not a valid parameter.
      *  */
-    public function internReadFile(file:String, ioSystem:IOSystem, scene:AiScene) {
+    public function internReadFile(file:String, ioSystem:IOStream, scene:AiScene) {
 
     }
 

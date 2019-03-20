@@ -49,7 +49,7 @@ class AiMaterialProperty {
     public var fullyQualifiedName(get, null):String;
 
     function get_fullyQualifiedName() {
-        return AiMaterial.createFullyQualifiedName(mKey, mType, mIndex);
+        return AiMaterial.createFullyQualifiedName(mKey, mSemantic, mIndex);
     }
     /// <returns>Float</returns>
     public function getFloatValue() {
@@ -80,11 +80,11 @@ class AiMaterialProperty {
         //We may have a Color that's RGB, so still read it and set alpha to 1.0
 
 
-        if (mData.length >= 4 * 8) {
+        if (mData.length >= 4 * 4) {
             var stream = new MemoryIOStream(mData);
             return IOStreamUtil.readAiColor4D(stream);
         }
-        else if (mData.length >= 3 * 8) {
+        else if (mData.length >= 3 * 4) {
             var stream = new MemoryIOStream(mData);
             var color3D:AiColor3D = IOStreamUtil.readAiColor3D(stream);
             return new AiColor4D(color3D.r, color3D.g, color3D.b, 1.0);
@@ -569,11 +569,11 @@ class AiMaterial {
     /// <param name="texType">Texture type; non-texture properties should leave this <see cref="TextureType.None"/></param>
     /// <param name="texIndex">Texture index; non-texture properties should leave this zero.</param>
     /// <returns>The fully qualified name</returns>
-    public static function createFullyQualifiedName(baseName, texType, texIndex) {
+    public static function createFullyQualifiedName(baseName:String, texType:Int, texIndex:Int) {
         if (null == (baseName))
             return null;
 
-        return "{$baseName},{$texType},{$texIndex}" ;
+        return baseName+","+texType+","+texIndex ;
     }
 
     /// <summary>
@@ -617,7 +617,7 @@ class AiMaterial {
         if (null == (fullyQualifiedName)) {
             return null;
         }
-        return Lambda.find(properties, function(p:AiMaterialProperty)return p.mKey == fullyQualifiedName);
+        return Lambda.find(properties, function(p:AiMaterialProperty)return p.fullyQualifiedName == fullyQualifiedName);
     }
 
     /// <summary>
@@ -663,7 +663,7 @@ class AiMaterial {
             return false;
         }
         return Lambda.exists(properties, function(p:AiMaterialProperty) {
-            return p.mKey == fullyQualifiedName;
+            return p.fullyQualifiedName == fullyQualifiedName;
         });
     }
 
@@ -750,8 +750,8 @@ class AiMaterial {
         for (matProp in properties) {
 
 
-            if (StringTools.startsWith(matProp.mKey, AiMatKeys.TEXTURE_BASE) && matProp.mType == texType) {
-                count++;
+            if ( matProp.mKey==AiMatKeys.TEXTURE_BASE && matProp.mSemantic == texType) {
+                count = Math.floor( Math.max(count,matProp.mIndex+1));
             }
         }
 

@@ -324,8 +324,8 @@ class AiMesh {
         this.tangents = [];
 
         this.bitangents = [];
-        this.colors = [[]];
-        this.textureCoords = [[]];//:Array<Array<Array<Float>>>
+        this.colors = [];
+        this.textureCoords = [];//:Array<Array<Array<Float>>>
 
         this.faces = [];
         this.numBones = 0;

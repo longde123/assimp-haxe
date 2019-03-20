@@ -1,4 +1,6 @@
 package assimp;
+import assimp.IOSystem.MemoryIOStream;
+import assimp.IOSystem.IOStream;
 import assimp.IOSystem.MemoryIOSystem;
 import haxe.io.Bytes;
 import Lambda;
@@ -145,10 +147,32 @@ class Importer {
 //        }
 
         // Find an worker class which can handle the file
-        var imp:BaseImporter = Lambda.find(impl.importer, function(it:BaseImporter)return it.canRead(file, ioHandler, false));
+        var stream:IOStream=ioHandler.open(file);
+        readFileFromStream(file,stream,flags);
+        ioHandler.close(stream);
+        return impl.scene;
+    }
+
+    public function readFileFromMemory(buffer:Bytes, flags:Int, hint:String = ""):AiScene {
+        var MaxLenHint = 200;
+        if (buffer.length == 0 || hint.length > MaxLenHint) {
+            impl.errorString = "Invalid parameters passed to ReadFileFromMemory()";
+            return null;
+        }
+        var AI_MEMORYIO_MAGIC_FILENAME="___magic___";
+        var fileName = AI_MEMORYIO_MAGIC_FILENAME+"."+hint;
+        var stream = new MemoryIOStream( buffer);
+        if (impl.scene != null) {
+            trace("(Deleting previous scene)");
+            freeScene();
+        }
+        return readFileFromStream(fileName,stream,flags);
+    }
+
+    function readFileFromStream(file:String,stream:IOStream,flags:Int){
+        var imp:BaseImporter = Lambda.find(impl.importer, function(it:BaseImporter)return it.canRead(file, stream, false));
 
         if (imp == null) {
-
             trace("Assimp could not find an importer for the file!");
             return null;
             // not so bad yet ... try format auto detection.
@@ -173,7 +197,7 @@ class Importer {
         }
 
         // Get file size for progress handler
-        var fileSize = ioSystem.open(file).length;
+        var fileSize = stream.length;
 
         // Dispatch the reading to the worker class for this format
         var desc = imp.info;
@@ -185,7 +209,7 @@ class Importer {
 //            profiler->BeginRegion("import");
 //        }
 
-        impl.scene = imp.readFile(impl, ioHandler, file);
+        impl.scene = imp.readFile(impl, stream, file);
         impl.progressHandler.updateFileRead(fileSize, fileSize);
 
 //        if (profiler) { TODO
@@ -217,25 +241,6 @@ class Importer {
 //        if (profiler) { profiler ->
 //            EndRegion("total");
 //        }
-        return impl.scene;
-    }
-
-    public function readFileFromMemory(buffer:Bytes, flags:Int, hint:String = ""):AiScene {
-        var MaxLenHint = 200;
-        if (buffer.length == 0 || hint.length > MaxLenHint) {
-            impl.errorString = "Invalid parameters passed to ReadFileFromMemory()";
-            return null;
-        }
-
-        // prevent deletion of previous IOSystem
-        var io = impl.ioSystem;
-
-        var fileName = "$AI_MEMORYIO_MAGIC_FILENAME.$hint";
-
-        ioHandler = new MemoryIOSystem(fileName, buffer);
-        readFile(fileName, ioHandler, flags);
-
-        impl.ioSystem = io;
 
         return impl.scene;
     }

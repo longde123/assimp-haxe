@@ -25,10 +25,11 @@ typedef AiMatrix3x3 = Mat3;
             _r1c0:Float = 0, _r1c1:Float = 0, _r1c2:Float = 0,
             _r2c0:Float = 0, _r2c1:Float = 0, _r2c2:Float = 0
 
-            bone.offsetMatrix.a0,bone.offsetMatrix.b0,bone.offsetMatrix.c0,bone.offsetMatrix.d0,
-            bone.offsetMatrix.a1,bone.offsetMatrix.b1,bone.offsetMatrix.c1,bone.offsetMatrix.d1,
-            bone.offsetMatrix.a2,bone.offsetMatrix.b2,bone.offsetMatrix.c2,bone.offsetMatrix.d2,
-            bone.offsetMatrix.a3,bone.offsetMatrix.b3,bone.offsetMatrix.c3,bone.offsetMatrix.d3
+
+aiMatrix4x4t (  TReal _a1, TReal _a2, TReal _a3, TReal _a4,
+TReal _b1, TReal _b2, TReal _b3, TReal _b4,
+TReal _c1, TReal _c2, TReal _c3, TReal _c4,
+TReal _d1, TReal _d2, TReal _d3, TReal _d4);
             */
 class AiDefines {
 
@@ -156,193 +157,74 @@ class Defs {
     /// Constructs a new Quaternion from a rotation matrix.
     /// </summary>
     /// <param name="matrix">Rotation matrix to create the Quaternion from.</param>
-    public static function toQuaternion(matrix:AiMatrix3x3) {
-        var trace1 = matrix.r0c0 + matrix.r1c1 + matrix.r2c2;
-        var X = 0.0;
-        var Y = 0.0;
-        var Z = 0.0;
-        var W = 0.0;
-//        float trace = matrix.A1 + matrix.B2 + matrix.C3;
-//
+    static function toQuaternion(matrix:AiMatrix3x3) {
 
-
-        //        if(trace > 0)
-//        {
-//            float s = (float) Math.Sqrt(trace + 1.0f) * 2.0f;
-//            W = .25f * s;
-//            X = (matrix.C2 - matrix.B3) / s;
-//            Y = (matrix.A3 - matrix.C1) / s;
-//            Z = (matrix.B1 - matrix.A2) / s;
-//        }
-        if (trace1 > 0) {
-            var s = Math.sqrt(trace1 + 1.0) * 2.0;
-            W = .25 * s;
-            X = (matrix.r1c2 - matrix.r2c1) / s;
-            Y = (matrix.r2c0 - matrix.r0c2) / s;
-            Z = (matrix.r0c1 - matrix.r1c0) / s;
-        }
-
-//        else if((matrix.A1 > matrix.B2) && (matrix.A1 > matrix.C3))
-//        {
-//            float s = (float) Math.Sqrt(((1.0 + matrix.A1) - matrix.B2) - matrix.C3) * 2.0f;
-//            W = (matrix.C2 - matrix.B3) / s;
-//            X = .25f * s;
-//            Y = (matrix.A2 + matrix.B1) / s;
-//            Z = (matrix.A3 + matrix.C1) / s;
-//        }
-        else if ((matrix.r0c0 > matrix.r1c1) && (matrix.r0c0 > matrix.r2c2)) {
-            var s = Math.sqrt(((1.0 + matrix.r0c0) - matrix.r1c1) - matrix.r2c2) * 2.0 ;
-            W = (matrix.r1c2 - matrix.r2c1) / s;
-            X = .25 * s;
-            Y = (matrix.r1c0 + matrix.r0c1) / s;
-            Z = (matrix.r2c0 + matrix.r0c2) / s;
-        }
-            //        else if(matrix.B2 > matrix.C3)
-//        {
-//            float s = (float) Math.Sqrt(((1.0f + matrix.B2) - matrix.A1) - matrix.C3) * 2.0f;
-//        W = (matrix.A3 - matrix.C1) / s;
-//        X = (matrix.A2 + matrix.B1) / s;
-//        Y = .25f * s;
-//        Z = (matrix.B3 + matrix.C2) / s;
-//        }
-        else if (matrix.r1c1 > matrix.r2c2) {
-            var s = Math.sqrt(((1.0 + matrix.r1c1) - matrix.r0c0) - matrix.r2c2) * 2.0;
-            W = (matrix.r2c0 - matrix.r0c2) / s;
-            X = (matrix.r1c0 + matrix.r0c1) / s;
-            Y = .25 * s;
-            Z = (matrix.r2c1 + matrix.r1c2) / s;
-        }
-
-//        else
-//        {
-//            float s = (float) Math.Sqrt(((1.0f + matrix.C3) - matrix.A1) - matrix.B2) * 2.0f;
-//        W = (matrix.B1 - matrix.A2) / s;
-//        X = (matrix.A3 + matrix.C1) / s;
-//        Y = (matrix.B3 + matrix.C2) / s;
-//            Z = .25f * s;
-//        }
-        else {
-            var s = Math.sqrt(((1.0 + matrix.r2c2) - matrix.r0c0) - matrix.r1c1) * 2.0 ;
-            W = (matrix.r0c1 - matrix.r1c0) / s;
-            X = (matrix.r2c0 + matrix.r0c2) / s;
-            Y = (matrix.r2c1 + matrix.r1c2) / s;
-            Z = .25 * s;
-        }
-        var tmp = new AiQuaternion();
-        Quat.normalize(new Quat(X, Y, Z, W), tmp);
-        return tmp;
     }
 
     public static function decompose(this1:Mat4, pScaling:AiVector3D, pRotation:AiQuaternion, pPosition:AiVector3D) {
 
-        /* extract translation */
-        pPosition.x = this1.r3c1;
-        pPosition.y = this1.r3c2;
-        pPosition.z = this1.r3c3;
-
-        /* extract the columns of the matrix. */
-        var vCols = [
-            new AiVector3D(this1.r0c0, this1.r1c0, this1.r2c0),
-            new AiVector3D(this1.r0c1, this1.r1c1, this1.r2c1),
-            new AiVector3D(this1.r0c2, this1.r1c2, this1.r2c2)];
-
-        /* extract the scaling factors */
-        pScaling.x = vCols[0].length();
-        pScaling.y = vCols[1].length();
-        pScaling.z = vCols[2].length();
-
-        /* and the sign of the scaling */
-//todo if (det < 0) pScaling.negateAssign()
-
-        /* and remove all scaling from the matrix */
-        if (pScaling.x != 0) vCols[0] /= pScaling.x;
-        if (pScaling.y != 0) vCols[1] /= pScaling.y;
-        if (pScaling.z != 0) vCols[2] /= pScaling.z;
-
-        // build a 3x3 rotation matrix
-        var m = new AiMatrix3x3(
-        vCols[0].x, vCols[1].x, vCols[2].x,
-        vCols[0].y, vCols[1].y, vCols[2].y,
-        vCols[0].z, vCols[1].z, vCols[2].z);
-
-        // and generate the rotation quaternion from it
-        var q:AiQuaternion = toQuaternion(m);
-        pRotation.x = q.x;
-        pRotation.y = q.y;
-        pRotation.z = q.z;
-        pRotation.w = q.w;
     }
 
-    static public function getMatrix(q:AiQuaternion):AiMatrix3x3 {
-        var X = q.x;
-        var Y = q.y;
-        var Z = q.z;
-        var W = q.z;
-        var xx = X * X;
-        var yy = Y * Y;
-        var zz = Z * Z;
+    static public function mat3_cast(q:Quat):Mat3 {
+        var  result=new Mat3();
+        var qxx:Float=(q.x * q.x);
+        var qyy:Float=(q.y * q.y);
+        var qzz:Float=(q.z * q.z);
+        var qxz:Float=(q.x * q.z);
+        var qxy:Float=(q.x * q.y);
+        var qyz:Float=(q.y * q.z);
+        var qwx:Float=(q.w * q.x);
+        var qwy:Float=(q.w * q.y);
+        var qwz:Float=(q.w * q.z);
+        result.r0c0 = 1 - 2 * (qyy +  qzz);
+        result.r1c0 = 2 * (qxy + qwz);
+        result.r2c0 = 2 * (qxz - qwy);
 
-        var xy = X * Y;
-        var zw = Z * W;
-        var zx = Z * X;
-        var yw = Y * W;
-        var yz = Y * Z;
-        var xw = X * W;
+        result.r0c1 = 2 * (qxy - qwz);
+        result.r1c1 = 1 - 2 * (qxx +  qzz);
+        result.r2c1= 2 * (qyz + qwx);
 
-        var mat = new AiMatrix3x3();
-        mat.r0c0 = 1.0 - (2.0 * (yy + zz));
-        mat.r0c1 = 2.0 * (xy + zw);
-        mat.r0c2 = 2.0 * (zx - yw);
-
-        mat.r1c0 = 2.0 * (xy - zw);
-        mat.r1c1 = 1.0 - (2.0 * (zz + xx));
-        mat.r1c2 = 2.0 * (yz + xw);
-
-        mat.r2c0 = 2.0 * (zx + yw);
-        mat.r2c1 = 2.0 * (yz - xw);
-        mat.r2c2 = 1.0 - (2.0 * (yy + xx));
-
-        return mat;
+        result.r0c2 = 2 * (qxz + qwy);
+        result.r1c2 = 2 * (qyz - qwx);
+        result.r2c2 = 1 - 2 * (qxx +  qyy);
+        return result;
     }
 
-    static public function slerp(start:AiQuaternion, end:AiQuaternion, factor:Float):AiQuaternion {
-        //Calc cosine theta
-        var cosom = (start.x * end.x) + (start.y * end.y) + (start.z * end.z) + (start.w * end.w);
+    static public function slerp(pStart:AiQuaternion, pEnd:AiQuaternion, pFactor:Float):AiQuaternion {
+        // calc cosine theta
+        var cosom = pStart.x * pEnd.x + pStart.y * pEnd.y + pStart.z * pEnd.z + pStart.w * pEnd.w;
 
-        //Reverse signs if needed
-        if (cosom < 0.0) {
+        // adjust signs (if necessary)
+        var end = pEnd;
+        if (cosom < (0.0)) {
             cosom = -cosom;
-            end.x = -end.x;
+            end.x = -end.x; // Reverse all signs
             end.y = -end.y;
             end.z = -end.z;
             end.w = -end.w;
         }
 
-        //calculate coefficients
-        var sclp:Float = 0;
-        var sclq:Float = 0;
-        //0.0001 -> some episilon
-        if ((1.0 - cosom) > 0.0001) {
-            //Do a slerp
-            var omega:Float = 0;
-            var sinom:Float = 0;
-            omega = Math.acos(cosom); //extract theta from the product's cos theta
+        // Calculate coefficients
+        var sclp = 0.0, sclq = 0.0;
+        // 0.0001 -> some epsillon
+        if (((1.0) - cosom) > (0.0001))  {
+            // Standard case (slerp)
+            var omega = 0.0, sinom = 0.0;
+            omega = Math.acos(cosom); // extract theta from dot product's cos theta
             sinom = Math.sin(omega);
-            sclp = Math.sin((1.0 - factor) * omega) / sinom;
-            sclq = Math.sin(factor * omega) / sinom;
+            sclp = Math.sin(( (1.0) - pFactor) * omega) / sinom;
+            sclq = Math.sin(pFactor * omega) / sinom;
+        } else {
+            // Very close, do linear interp (because it's faster)
+            sclp = (1.0) - pFactor;
+            sclq = pFactor;
         }
-        else {
-            //Very close, do a lerp instead since its faster
-            sclp = 1.0 - factor;
-            sclq = factor;
-        }
-
-        var q:AiQuaternion = new AiQuaternion();
-        q.x = (sclp * start.x) + (sclq * end.x);
-        q.y = (sclp * start.y) + (sclq * end.y);
-        q.z = (sclp * start.z) + (sclq * end.z);
-        q.w = (sclp * start.w) + (sclq * end.w);
-        return q;
+        var pOut = new Quat();
+        pOut.x = sclp * pStart.x + sclq * end.x;
+        pOut.y = sclp * pStart.y + sclq * end.y;
+        pOut.z = sclp * pStart.z + sclq * end.z;
+        pOut.w = sclp * pStart.w + sclq * end.w;
+        return pOut;
     }
 
 

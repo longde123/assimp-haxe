@@ -122,7 +122,14 @@ class AiNode {
 
 
     public function new() {
-
+        name = "";
+        transformation = new AiMatrix4x4();
+        parent = null;
+        numChildren = 0;
+        children = [];
+        numMeshes = 0;
+        meshes = [];
+        metaData = new AiMetadata();
     }
 
     public function findNode(name:String):Null<AiNode> {
@@ -218,7 +225,21 @@ class AiScene {
     public var metaData:AiMetadata;//
 
     public function new() {
-
+        flags = 0;
+        rootNode = new AiNode();
+        numMeshes = 0 ;
+        meshes = [];
+        numMaterials = 0;
+        materials = [];
+        numAnimations = 0;
+        animations = [];
+        numTextures = 0;
+        textures = [] ;// The index is the file name
+        numLights = 0;
+        lights = [];
+        numCameras = 0;
+        cameras = [];
+        metaData = new AiMetadata();
     }
     /** Check whether the scene contains meshes
      *  Unless no special scene flags are set this will always be true. */
