@@ -1,4 +1,6 @@
 package assimp;
+import assimp.format.Mesh.AiAnimMesh;
+import assimp.format.Mesh.AiMesh;
 class Assimp {
 
     static public var DEBUG = true;
@@ -11,6 +13,25 @@ class Assimp {
     static public var AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE = "PP_GSN_MAX_SMOOTHING_ANGLE";
     static public var AI_CONFIG_PP_RVC_FLAGS = "PP_RVC_FLAGS";
     static public var AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS = "IMPORT_FBX_PRESERVE_PIVOTS";
+
+/**
+ * Created by elect on 31/01/2017.
+ */
+
+    static public function aiCreateAnimMesh(mesh: AiMesh): AiAnimMesh {
+
+        var animesh = new AiAnimMesh();
+        animesh.mVertices = mesh.vertices;
+        animesh.mNormals = mesh.normals;
+        animesh.mTangents = mesh.tangents;
+        animesh.mBitangents = mesh.bitangents;
+        animesh.mNumVertices = mesh.numVertices;
+
+        animesh.mColors=mesh.colors.copy();
+
+        animesh.mTextureCoords=mesh.textureCoords.copy();
+        return animesh;
+    }
 
     public function new() {
     }

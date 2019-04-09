@@ -126,7 +126,6 @@ class AiBone {
     }
 }
 
-typedef AiPrimitiveTypeMask = Int
 /** @brief Enumerates the types of geometric primitives supported by Assimp.
  * 1 1
  *  @see aiFace Face data structure
@@ -170,8 +169,18 @@ typedef AiPrimitiveTypeMask = Int
 
 class AiAnimMesh {
 /** Weight of the AnimMesh. */
-    var mWeight:Float ;
+    public  var mWeight:Float ;
+    public var  mVertices:Array<AiVector3D> ;
+    public var mNormals:Array<AiVector3D> ;
+    public var mTangents:Array<AiVector3D> ;
+    public var mBitangents:Array<AiVector3D> ;
+    public var mColors:Array<Array<AiColor4D>>;
+    public var mTextureCoords:Array<Array<AiVector3D>> ;
+    public var mNumVertices:Int;
 
+    public function new ():Void {
+
+    }
 }
 
 /** Enumerates the methods of mesh morphing supported by Assimp.    */
@@ -207,7 +216,7 @@ class AiMesh {
 /** Bitwise combination of the members of the #aiPrimitiveType enum.
          * This specifies which types of primitives are present in the mesh.
          * The "SortByPrimitiveType"-Step can be used to make sure the output meshes consist of one primitive Type each.         */
-    public var primitiveTypes:AiPrimitiveTypeMask ;// = 0,
+    public var primitiveTypes:AiPrimitiveType ;// = 0,
 
     /** The number of vertices in this mesh.
          * This is also the size of all of the per-vertex data arrays.

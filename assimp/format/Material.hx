@@ -1,4 +1,5 @@
 package assimp.format;
+import haxe.io.BytesOutput;
 import assimp.IOSystem.MemoryIOStream;
 import assimp.format.Defs.AiColor4D;
 import haxe.io.BytesInput;
@@ -58,6 +59,42 @@ class AiMaterialProperty {
 
         return 0;
     }
+    public function  setProperty(  baseName,    texType,   textureIndex) :AiMaterialProperty{
+        this.mKey=baseName;
+        this.mSemantic=texType;
+        this.mIndex=textureIndex;
+        return this;
+    }
+    public function setStringValue(s:String) :AiMaterialProperty{
+        mType  = PropertyType.AiString;
+        var tmp=new BytesOutput();
+        IOStreamUtil.writeAiString(tmp,s);
+        mData=tmp.getBytes();
+        return  this;
+    }
+
+    public function setIntegerValue(s:Int) :AiMaterialProperty{
+        mType  = PropertyType.AiInteger;
+        var tmp=new BytesOutput();
+        tmp.writeInt32(s);
+        mData=tmp.getBytes();
+        return  this;
+    }
+    public function setFloatValue(s:Float) :AiMaterialProperty{
+        mType  = PropertyType.AiFloat;
+        var tmp=new BytesOutput();
+        tmp.writeFloat(s);
+        mData=tmp.getBytes();
+        return  this;
+    }
+    public function setColor4DValue(s:AiColor4D ){
+        mType  = PropertyType.AiFloat ;
+        var tmp=new BytesOutput();
+        IOStreamUtil.writeAiColor4D(tmp,s);
+        mData=tmp.getBytes();
+        return  this;
+    }
+
 
     public function getStringValue() {
         if (mType != PropertyType.AiString)
@@ -465,8 +502,8 @@ class AiUVTransform {
 class AiString {
     public var data:String;
 
-    public function new():Void {
-
+    public function new(d):Void {
+        data=d;
     }
 }
 

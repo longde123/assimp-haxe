@@ -390,3 +390,9 @@ package assimp;
      */
     var TargetRealtime_MaxQuality = (TargetRealtime_Quality | FindInstances | ValidateDataStructure | OptimizeMeshes);
 }
+//
+//infix fun Int.has(b: AiPostProcessStep) = and(b.i) != 0
+//infix fun Int.hasnt(b: AiPostProcessStep) = and(b.i) == 0
+//infix fun Int.or(b: AiPostProcessStep) = or(b.i)
+//infix fun AiPostProcessStep.or(b: AiPostProcessStep) = i or b.i
+//infix fun Int.wo(b: AiPostProcessStep) = and(b.i.inv())

@@ -11,6 +11,7 @@ import glm.Mat3;
 import glm.Vec4;
 import glm.Vec3;
 typedef Ai_real = Float;
+typedef AiVector4D = Vec4;
 typedef AiVector3D = Vec3;
 typedef AiColor3D = Vec3;
 typedef AiColor4D = Vec4;
@@ -164,7 +165,30 @@ class Defs {
     public static function decompose(this1:Mat4, pScaling:AiVector3D, pRotation:AiQuaternion, pPosition:AiVector3D) {
 
     }
+    static public function mat4_cast(q:Quat):Mat4 {
+        var  result=new Mat4();
+        var qxx:Float=(q.x * q.x);
+        var qyy:Float=(q.y * q.y);
+        var qzz:Float=(q.z * q.z);
+        var qxz:Float=(q.x * q.z);
+        var qxy:Float=(q.x * q.y);
+        var qyz:Float=(q.y * q.z);
+        var qwx:Float=(q.w * q.x);
+        var qwy:Float=(q.w * q.y);
+        var qwz:Float=(q.w * q.z);
+        result.r0c0 = 1 - 2 * (qyy +  qzz);
+        result.r1c0 = 2 * (qxy + qwz);
+        result.r2c0 = 2 * (qxz - qwy);
 
+        result.r0c1 = 2 * (qxy - qwz);
+        result.r1c1 = 1 - 2 * (qxx +  qzz);
+        result.r2c1= 2 * (qyz + qwx);
+
+        result.r0c2 = 2 * (qxz + qwy);
+        result.r1c2 = 2 * (qyz - qwx);
+        result.r2c2 = 1 - 2 * (qxx +  qyy);
+        return result;
+    }
     static public function mat3_cast(q:Quat):Mat3 {
         var  result=new Mat3();
         var qxx:Float=(q.x * q.x);

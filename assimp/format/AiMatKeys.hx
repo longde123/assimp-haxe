@@ -266,3 +266,30 @@ class AiMatKeys {
     public function new() {
     }
 }
+class AiPbrmaterial{
+    static public var GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR= "$mat.gltf.pbrMetallicRoughness.baseColorFactor, 0, 0";
+    static public var GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR ="$mat.gltf.pbrMetallicRoughness.metallicFactor, 0, 0";
+    static public var GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR= "$mat.gltf.pbrMetallicRoughness.roughnessFactor, 0, 0";
+    static public var GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE = AiTextureType.diffuse;//+", 1";
+    static public var GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE= AiTextureType.unknown;//+", 0";
+    static public var GLTF_ALPHAMODE ="$mat.gltf.alphaMode, 0, 0";
+    static public var GLTF_ALPHACUTOFF ="$mat.gltf.alphaCutoff, 0, 0";
+    static public var GLTF_PBRSPECULARGLOSSINESS= "$mat.gltf.pbrSpecularGlossiness, 0, 0";
+    static public var GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR= "$mat.gltf.pbrMetallicRoughness.glossinessFactor, 0, 0";
+    static public var GLTF_UNLIT ="$mat.gltf.unlit, 0, 0";
+    static public var _GLTF_TEXTURE_TEXCOORD_BASE= "$tex.file.texCoord";
+    static public var _GLTF_MAPPINGNAME_BASE ="$tex.mappingname";
+    static public var _GLTF_MAPPINGID_BASE ="$tex.mappingid";
+    static public var _GLTF_MAPPINGFILTER_MAG_BASE ="$tex.mappingfiltermag";
+    static public var _GLTF_MAPPINGFILTER_MIN_BASE ="$tex.mappingfiltermin";
+    static public var _GLTF_SCALE_BASE= "$tex.scale";
+    static public var _GLTF_STRENGTH_BASE ="$tex.strength";
+
+    static public var GLTF_TEXTURE_TEXCOORD= _GLTF_TEXTURE_TEXCOORD_BASE;
+    static public var GLTF_MAPPINGNAME= _GLTF_MAPPINGNAME_BASE ;
+    static public var GLTF_MAPPINGID= _GLTF_MAPPINGID_BASE ;
+    static public var GLTF_MAPPINGFILTER_MAG= _GLTF_MAPPINGFILTER_MAG_BASE;
+    static public var GLTF_MAPPINGFILTER_MIN=_GLTF_MAPPINGFILTER_MIN_BASE;
+    static public var GLTF_TEXTURE_SCALE = _GLTF_SCALE_BASE;
+    static public var GLTF_TEXTURE_STRENGTH= _GLTF_STRENGTH_BASE;
+}

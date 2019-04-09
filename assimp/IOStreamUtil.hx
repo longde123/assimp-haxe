@@ -1,5 +1,7 @@
 package assimp;
 
+import haxe.io.BytesOutput;
+import haxe.io.Bytes;
 import assimp.format.Defs.AiColor3D;
 import assimp.format.Anim.AiQuatKey;
 import assimp.format.Anim.AiVectorKey;
@@ -43,7 +45,14 @@ class IOStreamUtil {
         c.a = stream.readFloat();
         return c;
     }
+    static public function writeAiColor4D(stream:BytesOutput ,c :AiColor4D) {
 
+        stream.writeFloat( c.r );
+        stream.writeFloat( c.g );
+        stream.writeFloat( c.b  );
+        stream.writeFloat( c.a  );
+        return stream;
+    }
 // -----------------------------------------------------------------------------------
     static public function readAiQuaternion(stream:IOStream) {
         var v = new AiQuaternion();
@@ -62,6 +71,15 @@ class IOStreamUtil {
             return s;
         }
         return null;
+    }
+
+    static public function writeAiString(stream:BytesOutput,s:String):BytesOutput {
+        var tmp=new BytesOutput();
+        tmp.writeString(s);
+        var len = tmp.length;
+        stream.writeInt32(len);
+        stream.writeString(s);
+        return stream;
     }
 
 // -----------------------------------------------------------------------------------
